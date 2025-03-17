@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Notificaciones</h2>
+<ul class="list-group">
+    {% for notificacion in notificaciones %}
+        <li class="list-group-item">
+            {{ notificacion.mensaje }}
+            <small>{{ notificacion.fecha_creacion }}</small>
+        </li>
+    {% empty %}
+        <li class="list-group-item text-muted">No tienes nuevas notificaciones</li>
+    {% endfor %}
+</ul>
+{% endblock %}

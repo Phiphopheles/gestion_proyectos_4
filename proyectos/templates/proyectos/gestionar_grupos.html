@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Grupos - Proyecto {{ proyecto.titulo }}</title>
+</head>
+<body>
+    <h1>Gestionar Grupos - Proyecto {{ proyecto.titulo }}</h1>
+
+    <h2>Usuarios Asignados</h2>
+    <ul>
+        {% for grupo in grupos %}
+            <li>{{ grupo.usuario.username }} - {{ grupo.get_rol_display }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Asignar Usuario a Proyecto</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="usuario">Usuario:</label>
+        <select name="usuario" id="usuario" required>
+            {% for usuario in usuarios %}
+                <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="rol">Rol:</label>
+        <select name="rol" id="rol" required>
+            <option value="admin">Administrador</option>
+            <option value="miembro">Miembro</option>
+            <option value="invitado">Invitado</option>
+        </select>
+
+        <button type="submit">Asignar</button>
+    </form>
+
+</body>
+</html>
