@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ proyecto.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'gestion_proyectos_3:proyectos_list' %}">Proyectos</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ proyecto.titulo }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-auto">
+            {% if user.is_staff %}
+            <a href="{% url 'gestion_proyectos_3:tarea_create' proyecto.id %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Nueva Tarea
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Información del Proyecto
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-3">{{ proyecto.titulo }}</h4>
+                    <p class="text-muted">{{ proyecto.descripcion }}</p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-calendar me-2"></i>Fecha de inicio:</strong> {{ proyecto.fecha_inicio|date:"d/m/Y" }}</p>
+                            {% if proyecto.fecha_finalizacion %}
+                            <p><strong><i class="fas fa-flag-checkered me-2"></i>Fecha de finalización:</strong> {{ proyecto.fecha_finalizacion|date:"d/m/Y" }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong><i class="fas fa-users me-2"></i>Miembros:</strong> {{ proyecto.usuarios_asignados.count }}</p>
+                            <p><strong><i class="fas fa-tasks me-2"></i>Tareas:</strong> {{ proyecto.tareas.count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Tareas del Proyecto
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if proyecto.tareas.all %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Estado</th>
+                                        <th>Fecha límite</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tarea in proyecto.tareas.all %}
+                                    <tr>
+                                        <td>{{ tarea.titulo }}</td>
+                                        <td>
+                                            <span class="badge {% if tarea.estado == 'completado' %}bg-success{% else %}bg-warning{% endif %}">
+                                                {{ tarea.get_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ tarea.fecha_limite|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if user.is_staff %}
+                                            <a href="#" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay tareas en este proyecto</p>
+                            {% if user.is_staff %}
+                            <a href="{% url 'gestion_proyectos_3:tarea_create' proyecto.id %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Crear Tarea
+                            </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>Miembros del Proyecto
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if proyecto.usuarios_asignados.all %}
+                        <ul class="list-group list-group-flush">
+                            {% for usuario in proyecto.usuarios_asignados.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-user me-2"></i>{{ usuario.username }}
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ usuario.grupoproyecto_set.get.rol }}
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center">No hay miembros asignados</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-comments me-2"></i>Últimos Mensajes
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if proyecto.mensajes.all %}
+                        <div class="list-group list-group-flush">
+                            {% for mensaje in proyecto.mensajes.all|slice:":5" %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ mensaje.remitente.username }}</h6>
+                                    <small class="text-muted">{{ mensaje.fecha_creacion|date:"d/m/Y" }}</small>
+                                </div>
+                                <p class="mb-1">{{ mensaje.contenido|truncatewords:20 }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No hay mensajes</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

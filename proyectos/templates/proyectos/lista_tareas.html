@@ -1,52 +1,126 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Tareas</title>
-</head>
-<body>
-    <h1>Lista de Tareas</h1>
+{% extends 'base.html' %}
 
-    <!-- Formulario de filtros -->
-    <form method="GET">
-        <label for="estado">Estado:</label>
-        <select name="estado" id="estado">
-            <option value="">Todos</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="en_progreso">En progreso</option>
-            <option value="completada">Completada</option>
-        </select>
+{% block title %}Lista de Tareas{% endblock %}
 
-        <label for="usuario">Usuario:</label>
-        <select name="usuario" id="usuario">
-            <option value="">Todos</option>
-            {% for usuario in usuarios %}
-                <option value="{{ usuario.id }}">{{ usuario.username }}</option>
-            {% endfor %}
-        </select>
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">
+                <i class="fas fa-tasks me-2"></i>Lista de Tareas
+            </h1>
+        </div>
+    </div>
 
-        <label for="proyecto">Proyecto:</label>
-        <select name="proyecto" id="proyecto">
-            <option value="">Todos</option>
-            {% for proyecto in proyectos %}
-                <option value="{{ proyecto.id }}">{{ proyecto.titulo }}</option>
-            {% endfor %}
-        </select>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-filter me-2"></i>Filtros
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="pendiente" {% if request.GET.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="completado" {% if request.GET.estado == 'completado' %}selected{% endif %}>Completado</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="usuario" class="form-label">Usuario</label>
+                    <select name="usuario" id="usuario" class="form-select">
+                        <option value="">Todos</option>
+                        {% for usuario in usuarios %}
+                            <option value="{{ usuario.id }}" {% if request.GET.usuario == usuario.id|stringformat:"s" %}selected{% endif %}>
+                                {{ usuario.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="proyecto" class="form-label">Proyecto</label>
+                    <select name="proyecto" id="proyecto" class="form-select">
+                        <option value="">Todos</option>
+                        {% for proyecto in proyectos %}
+                            <option value="{{ proyecto.id }}" {% if request.GET.proyecto == proyecto.id|stringformat:"s" %}selected{% endif %}>
+                                {{ proyecto.titulo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <button type="submit">Filtrar</button>
-    </form>
-
-    <ul>
-        {% for tarea in tareas %}
-            <li>
-                <strong>{{ tarea.titulo }}</strong> - {{ tarea.proyecto.titulo }} - 
-                {{ tarea.get_estado_display }} - Fecha límite: {{ tarea.fecha_limite }}
-                <a href="{% url 'editar_tarea' tarea.id %}">Editar</a>
-            </li>
-        {% empty %}
-            <li>No hay tareas disponibles.</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">
+                <i class="fas fa-list me-2"></i>Tareas
+            </h3>
+        </div>
+        <div class="card-body">
+            {% if tareas %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Proyecto</th>
+                                <th>Estado</th>
+                                <th>Fecha límite</th>
+                                <th>Asignados</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tarea in tareas %}
+                            <tr>
+                                <td>{{ tarea.titulo }}</td>
+                                <td>
+                                    <a href="{% url 'gestion_proyectos_3:proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
+                                        {{ tarea.proyecto.titulo }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge {% if tarea.estado == 'completado' %}bg-success{% else %}bg-warning{% endif %}">
+                                        {{ tarea.get_estado_display }}
+                                    </span>
+                                </td>
+                                <td>{{ tarea.fecha_limite|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% for usuario in tarea.usuarios_asignados.all %}
+                                        <span class="badge bg-info me-1">{{ usuario.username }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{% url 'gestion_proyectos_3:editar_tarea' tarea.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'gestion_proyectos_3:agregar_comentario' tarea.id %}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-comment"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay tareas disponibles</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

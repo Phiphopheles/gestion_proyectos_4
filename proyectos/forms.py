@@ -1,5 +1,5 @@
 from django import forms
-from .models import Tarea
+from .models import Tarea, Proyecto, Grupo
 from .models import Mensaje
 from .models import Comentario
 
@@ -34,3 +34,13 @@ class ComentarioForm(forms.ModelForm):
         widgets = {
             'contenido': forms.Textarea(attrs={'cols': 80, 'rows': 4}),
         }
+
+class ProyectoForm(forms.ModelForm):
+    class Meta:
+        model = Proyecto
+        fields = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_finalizacion']
+
+class GrupoForm(forms.ModelForm):
+    class Meta:
+        model = Grupo
+        fields = ['nombre', 'proyecto', 'usuarios', 'rol']

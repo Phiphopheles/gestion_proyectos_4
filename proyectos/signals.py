@@ -7,7 +7,7 @@ from .models import Notificacion, Tarea, Mensaje, Comentario
 @receiver(post_save, sender=Tarea)
 def notificar_tarea_asignada(sender, instance, created, **kwargs):
     if created:
-        for usuario in instance.asignados.all():
+        for usuario in instance.usuarios_asignados.all():
             Notificacion.objects.create(
                 usuario=usuario,
                 mensaje=f"Se te ha asignado una nueva tarea: {instance.titulo}"
@@ -17,7 +17,7 @@ def notificar_tarea_asignada(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Mensaje)
 def notificar_nuevo_mensaje(sender, instance, created, **kwargs):
     if created:
-        for usuario in instance.proyecto.usuarios.all():
+        for usuario in instance.proyecto.usuarios_asignados.all():
             if usuario != instance.remitente:
                 Notificacion.objects.create(
                     usuario=usuario,
@@ -28,7 +28,9 @@ def notificar_nuevo_mensaje(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Comentario)
 def notificar_nuevo_comentario(sender, instance, created, **kwargs):
     if created:
-        Notificacion.objects.create(
-            usuario=instance.tarea.creador,
-            mensaje=f"Nuevo comentario en la tarea {instance.tarea.titulo}"
-        )
+        for usuario in instance.tarea.usuarios_asignados.all():
+            if usuario != instance.autor:
+                Notificacion.objects.create(
+                    usuario=usuario,
+                    mensaje=f"Nuevo comentario en la tarea {instance.tarea.titulo}"
+                )
