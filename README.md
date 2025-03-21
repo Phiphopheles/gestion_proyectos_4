@@ -41,7 +41,7 @@ Crea las vistas, URLs y formularios necesarios en Django para gestionar todas la
 Implementa autenticación de usuarios para que cada usuario tenga su propia cuenta y pueda acceder a la aplicación de forma segura.
 Implementa un sistema de autorización basado en roles para controlar el acceso a las diferentes funcionalidades de la aplicación.
 
-#Arquitectura y ejecucción
+# Arquitectura y ejecucción
 Proyecto desarrollado en Django utilizando vscode y cursor. Base de datos con SQLite. Se puede correr en cualquier navegador al ejecutarlo. Se han utilizado librerías de terceros como Bootstrap para mejorar la interfaz de usuario.
 
 by Pedro Oria aka Phiphopheles
